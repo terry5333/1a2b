@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -12,11 +11,21 @@
     <!-- 引入 Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
             font-family: 'Noto Sans TC', sans-serif;
             touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
+            background-color: #0f172a;
         }
         .num-font {
             font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
@@ -34,7 +43,7 @@
         /* 圓圈彈跳動畫 */
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0.5; }
-            60% { transform: scale(1.12); }
+            60% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop {
@@ -44,8 +53,8 @@
         /* 錯誤搖晃動畫 */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
         .animate-shake {
             animation: shake 0.35s ease-in-out;
@@ -53,19 +62,19 @@
 
         /* 按鈕按壓立體感 */
         .key-btn {
-            box-shadow: 0 4px 0 #cbd5e1;
+            box-shadow: 0 3px 0 #cbd5e1;
             transition: all 0.1s ease;
         }
         .key-btn:active:not(:disabled) {
-            transform: translateY(3px);
+            transform: translateY(2px);
             box-shadow: 0 1px 0 #cbd5e1;
         }
         .key-btn-action {
-            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.15);
             transition: all 0.1s ease;
         }
         .key-btn-action:active:not(:disabled) {
-            transform: translateY(3px);
+            transform: translateY(2px);
             box-shadow: 0 1px 0 rgba(0,0,0,0.15);
         }
 
@@ -73,7 +82,7 @@
         .mark-eliminated {
             background-color: #f1f5f9 !important;
             color: #94a3b8 !important;
-            border-color: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
             position: relative;
         }
         .mark-eliminated::after {
@@ -89,108 +98,105 @@
             background-color: #dcfce7 !important;
             color: #15803d !important;
             border-color: #4ade80 !important;
-            box-shadow: 0 4px 0 #86efac !important;
+            box-shadow: 0 3px 0 #86efac !important;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 fixed inset-0 overflow-hidden flex justify-center items-center">
+<body class="text-slate-800 flex justify-center items-center">
 
-    <!-- 遊戲主容器 (優化手機版滿版高度與彈性滾動) -->
-    <div class="w-full max-w-md h-full sm:h-[94dvh] bg-[#f8fafc] sm:rounded-3xl sm:shadow-2xl sm:border-4 sm:border-slate-700 flex flex-col justify-between overflow-hidden relative">
+    <!-- 遊戲主容器 (手機版全寬 100dvh 滿版無黑邊，桌面版置中卡片) -->
+    <div class="w-full max-w-md mx-auto h-[100dvh] sm:h-[94dvh] flex flex-col bg-slate-50 sm:rounded-3xl sm:shadow-2xl sm:border-4 sm:border-slate-700 overflow-hidden relative">
         
-        <!-- 頂部導覽列 -->
-        <header class="bg-white px-3 py-2 sm:px-4 sm:py-3 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 shadow-xs">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold num-font text-xs sm:text-sm shadow-inner">
+        <!-- 頂部導覽列 (強制單行不換行 whitespace-nowrap shrink-0) -->
+        <header class="bg-white px-2.5 py-2 border-b border-slate-200 flex items-center justify-between gap-1 shrink-0 z-10 shadow-xs">
+            <div class="flex items-center gap-1.5 shrink-0">
+                <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold num-font text-xs shadow-inner shrink-0">
                     1A
                 </div>
-                <h1 class="font-black text-base sm:text-lg tracking-wide text-slate-800">1A2B 猜數字</h1>
+                <h1 class="font-black text-sm sm:text-base tracking-tight text-slate-800 whitespace-nowrap shrink-0">1A2B 猜數字</h1>
             </div>
 
-            <div class="flex items-center gap-1 sm:gap-1.5">
+            <div class="flex items-center gap-1 shrink-0">
                 <!-- 看答案按鈕 (滿10次後顯示，隨時可看) -->
-                <button id="giveUpBtn" onclick="openTenRoundModal()" class="hidden items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-rose-100 text-rose-700 border-rose-300 hover:bg-rose-200">
-                    <i class="ph-fill ph-eye text-rose-500 text-sm"></i>
-                    <span>看答案</span>
+                <button id="giveUpBtn" onclick="openTenRoundModal()" class="hidden items-center gap-0.5 px-2 py-1 rounded-full text-xs font-bold border transition-all bg-rose-100 text-rose-700 border-rose-300 hover:bg-rose-200 whitespace-nowrap shrink-0">
+                    <span>👀答案</span>
                 </button>
                 <!-- 提示按鈕 (滿5次後顯示) -->
-                <button id="hintBtn" onclick="openHintConfirm()" class="hidden items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 animate-bounce">
-                    <i class="ph-fill ph-lightbulb text-amber-500 text-sm"></i>
-                    <span>提示(1)</span>
+                <button id="hintBtn" onclick="openHintConfirm()" class="hidden items-center gap-0.5 px-2 py-1 rounded-full text-xs font-bold border transition-all bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 animate-bounce whitespace-nowrap shrink-0">
+                    <span>💡提示</span>
                 </button>
                 <!-- 筆記模式切換按鈕 -->
-                <button id="noteModeBtn" onclick="toggleNoteMode()" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200" title="標記排除或確定的數字">
-                    <i class="ph-bold ph-pencil-simple text-sm"></i>
-                    <span id="noteModeText">筆記: 關</span>
+                <button id="noteModeBtn" onclick="toggleNoteMode()" class="flex items-center gap-0.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 whitespace-nowrap shrink-0" title="標記排除或確定的數字">
+                    <span id="noteModeText">✏️ 筆記</span>
                 </button>
                 <!-- 規則說明按鈕 -->
-                <button onclick="toggleModal('rulesModal', true)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
-                    <i class="ph-bold ph-question text-base sm:text-lg"></i>
+                <button onclick="toggleModal('rulesModal', true)" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors shrink-0" title="規則說明">
+                    <i class="ph-bold ph-question text-sm"></i>
                 </button>
                 <!-- 重新開始按鈕 -->
-                <button onclick="initGame()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors" title="重新開始">
-                    <i class="ph-bold ph-arrows-clockwise text-base sm:text-lg"></i>
+                <button onclick="initGame()" class="w-7 h-7 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors shrink-0" title="重新開始">
+                    <i class="ph-bold ph-arrows-clockwise text-sm"></i>
                 </button>
             </div>
         </header>
 
         <!-- 狀態提示條與已獲得的提示 -->
-        <div class="bg-indigo-50/80 px-3 py-1.5 border-b border-indigo-100 flex justify-between items-center text-xs font-medium text-indigo-900 shrink-0">
-            <span id="statusText" class="flex items-center gap-1.5 truncate pr-2">
+        <div class="bg-indigo-50/90 px-3 py-1.5 border-b border-indigo-100 flex justify-between items-center gap-2 text-xs font-medium text-indigo-900 shrink-0">
+            <span id="statusText" class="flex items-center gap-1.5 truncate min-w-0">
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0"></span>
-                <span>請輸入 4 個不重複的數字</span>
+                <span class="truncate">請輸入 4 個不重複的數字</span>
             </span>
-            <div class="flex items-center gap-2 shrink-0">
-                <span id="revealedHintBadge" class="hidden px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 font-bold text-[11px] num-font"></span>
-                <span class="num-font font-bold text-indigo-600" id="turnCounter">第 1 回合</span>
+            <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                <span id="revealedHintBadge" class="hidden px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-bold text-[11px] num-font whitespace-nowrap shrink-0"></span>
+                <span class="num-font font-bold text-indigo-600 whitespace-nowrap shrink-0" id="turnCounter">第 1 回合</span>
             </div>
         </div>
 
-        <!-- 上半部：猜測數字圓圈區 (加上 min-h-0 解決手機瀏覽器 Flexbox 撐開問題) -->
-        <main id="boardContainer" class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-3 py-2.5 sm:py-4 flex flex-col items-center gap-2 sm:gap-2.5 scroll-smooth">
+        <!-- 上半部：猜測數字圓圈區 (預設5排，緊湊化確保手機一頁完整呈現) -->
+        <main id="boardContainer" class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2.5 py-2 flex flex-col items-center gap-1.5 scroll-smooth">
             <!-- 由 JavaScript 動態生成每一列的 4 個圓圈與結果 -->
         </main>
 
         <!-- 下半部：圓形數字鍵盤區 (針對手機螢幕最佳化高度與間距) -->
-        <section class="bg-white pt-2 pb-3 sm:pt-3 sm:pb-5 px-4 rounded-t-3xl shadow-[0_-8px_25px_-5px_rgba(0,0,0,0.08)] border-t border-slate-100 shrink-0 z-10">
+        <section class="bg-white pt-2 pb-3 px-4 rounded-t-3xl shadow-[0_-6px_20px_-5px_rgba(0,0,0,0.08)] border-t border-slate-200 shrink-0 z-10">
             <!-- 鍵盤小提示 -->
-            <div id="keypadHint" class="text-center text-[11px] text-slate-400 mb-1.5 font-medium h-4 flex items-center justify-center gap-2">
+            <div id="keypadHint" class="text-center text-[11px] text-slate-400 mb-1.5 font-medium h-4 flex items-center justify-center whitespace-nowrap">
                 <span>點擊下方圓圈輸入數字（5次可提示 / 10次可看答案）</span>
             </div>
 
             <!-- 3x4 電話鍵盤佈局 -->
-            <div class="grid grid-cols-3 gap-y-2 gap-x-5 max-w-[230px] sm:max-w-[250px] mx-auto justify-items-center">
+            <div class="grid grid-cols-3 gap-y-2 gap-x-5 max-w-[228px] mx-auto justify-items-center">
                 <!-- 第一排: 1, 2, 3 -->
-                <button onclick="handleNumberClick(1)" id="key-1" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">1</button>
-                <button onclick="handleNumberClick(2)" id="key-2" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">2</button>
-                <button onclick="handleNumberClick(3)" id="key-3" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">3</button>
+                <button onclick="handleNumberClick(1)" id="key-1" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">1</button>
+                <button onclick="handleNumberClick(2)" id="key-2" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">2</button>
+                <button onclick="handleNumberClick(3)" id="key-3" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">3</button>
 
                 <!-- 第二排: 4, 5, 6 -->
-                <button onclick="handleNumberClick(4)" id="key-4" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">4</button>
-                <button onclick="handleNumberClick(5)" id="key-5" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">5</button>
-                <button onclick="handleNumberClick(6)" id="key-6" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">6</button>
+                <button onclick="handleNumberClick(4)" id="key-4" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">4</button>
+                <button onclick="handleNumberClick(5)" id="key-5" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">5</button>
+                <button onclick="handleNumberClick(6)" id="key-6" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">6</button>
 
                 <!-- 第三排: 7, 8, 9 -->
-                <button onclick="handleNumberClick(7)" id="key-7" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">7</button>
-                <button onclick="handleNumberClick(8)" id="key-8" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">8</button>
-                <button onclick="handleNumberClick(9)" id="key-9" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">9</button>
+                <button onclick="handleNumberClick(7)" id="key-7" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">7</button>
+                <button onclick="handleNumberClick(8)" id="key-8" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">8</button>
+                <button onclick="handleNumberClick(9)" id="key-9" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">9</button>
 
                 <!-- 第四排: 退格(左輔助), 0(正中央圓圈), 送出(右輔助) -->
-                <button onclick="handleBackspace()" id="backspaceBtn" class="key-btn-action w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-100 border-2 border-amber-300 text-amber-700 flex items-center justify-center hover:bg-amber-200" title="刪除 (Backspace)">
-                    <i class="ph-bold ph-backspace text-xl sm:text-2xl"></i>
+                <button onclick="handleBackspace()" id="backspaceBtn" class="key-btn-action w-12 h-12 rounded-full bg-amber-100 border-2 border-amber-300 text-amber-700 flex items-center justify-center hover:bg-amber-200" title="刪除 (Backspace)">
+                    <i class="ph-bold ph-backspace text-xl"></i>
                 </button>
 
-                <button onclick="handleNumberClick(0)" id="key-0" class="key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 border-2 border-slate-300 text-xl sm:text-2xl font-bold text-slate-700 num-font flex items-center justify-center hover:border-indigo-400">0</button>
+                <button onclick="handleNumberClick(0)" id="key-0" class="key-btn w-12 h-12 rounded-full bg-slate-50 border-2 border-slate-300 text-xl font-bold text-slate-700 num-font flex items-center justify-center">0</button>
 
-                <button onclick="handleSubmit()" id="submitBtn" class="key-btn-action w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-indigo-600 border-2 border-indigo-700 text-white font-bold text-sm flex flex-col items-center justify-center hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none" title="確定送出 (Enter)">
-                    <i class="ph-bold ph-check text-lg sm:text-xl"></i>
+                <button onclick="handleSubmit()" id="submitBtn" class="key-btn-action w-12 h-12 rounded-full bg-indigo-600 border-2 border-indigo-700 text-white font-bold text-sm flex flex-col items-center justify-center hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none" title="確定送出 (Enter)">
+                    <i class="ph-bold ph-check text-xl"></i>
                 </button>
             </div>
         </section>
 
         <!-- 吐司提示訊息 (取代 alert) -->
         <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 bg-slate-800/95 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap">
-            <i class="ph-fill ph-warning-circle text-amber-400 text-base"></i>
+            <i class="ph-fill ph-warning-circle text-amber-400 text-base shrink-0"></i>
             <span id="toastMsg">提示訊息</span>
         </div>
 
@@ -223,7 +229,7 @@
                 </div>
                 <h2 class="text-xl font-black text-slate-800 mb-1">已經猜滿 10 次囉！</h2>
                 <p class="text-xs text-slate-500 mb-5 leading-relaxed">
-                    想要直接揭曉正確答案，還是要靠自己繼續推理挑戰呢？（選擇繼續玩的話，隨時可點右上角「看答案」）
+                    想要直接揭曉正確答案，還是要靠自己繼續推理挑戰呢？（選擇繼續玩的話，隨時可點頂部「👀答案」）
                 </p>
                 <div class="flex flex-col gap-2.5">
                     <button onclick="continuePlayingAfterTen()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-200 transition-all active:scale-95">
@@ -284,7 +290,7 @@
                     </div>
                     <p><strong>💡 舉例：</strong>若謎底為 <code class="font-bold text-indigo-600">1234</code>，你猜 <code class="font-bold text-slate-800">1356</code>，會得到 <strong>1A1B</strong>（1 位置對得 1A，3 位置錯得 1B）。</p>
                     <p><strong>🎁 提示與看答案機制：</strong>超過 <strong>5 次</strong>未猜中會獲得 <strong>1 次提示機會</strong>；滿 <strong>10 次</strong>後可選擇<strong>直接看答案</strong>，或<strong>不限次數繼續靠自己猜</strong>！</p>
-                    <p><strong>✏️ 筆記功能：</strong>點擊右上角的「筆記」按鈕開啟標記模式，可點擊下方數字鍵盤將數字標記為 <span class="text-rose-500 font-bold">紅色斜線(排除)</span> 或 <span class="text-emerald-600 font-bold">綠色(確認有此數字)</span>，幫助你推理！</p>
+                    <p><strong>✏️ 筆記功能：</strong>點擊頂部的「✏️ 筆記」按鈕開啟標記模式，可點擊下方數字鍵盤將數字標記為 <span class="text-rose-500 font-bold">紅色斜線(排除)</span> 或 <span class="text-emerald-600 font-bold">綠色(確認有此數字)</span>，幫助你推理！</p>
                 </div>
                 <button onclick="toggleModal('rulesModal', false)" class="mt-5 w-full py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm">
                     我知道了
@@ -296,7 +302,7 @@
 
     <script>
         // ================= 遊戲狀態變數 =================
-        const INITIAL_ROWS = 5; // 預設顯示 5 列圓圈（呼應手繪草圖上的 5 排圓圈）
+        const INITIAL_ROWS = 5; // 預設顯示 5 列圓圈
         let secretCode = [];
         let guesses = [];       // 已送出的猜測 [{ digits: [1,2,3,4], a: 1, b: 2 }]
         let currentInput = [];  // 當前正在輸入的 4 個數字
@@ -309,7 +315,6 @@
 
         // ================= 初始化遊戲 =================
         function initGame() {
-            // 產生 4 個不重複的隨機數字 (0-9)
             const pool = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             secretCode = [];
             for (let i = 0; i < 4; i++) {
@@ -350,13 +355,13 @@
             const container = document.getElementById('boardContainer');
             container.innerHTML = '';
 
-            // 總列數：預設顯示 5 列，超過 5 次後隨回合無限自動向下新增
+            // 總列數：預設顯示 5 列，超過 5 次後隨回合自動向下新增
             const totalRows = Math.max(INITIAL_ROWS, guesses.length + (isGameOver ? 0 : 1));
 
             for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
                 const rowEl = document.createElement('div');
                 rowEl.id = `row-${rowIndex}`;
-                rowEl.className = 'w-full flex items-center justify-between px-2 py-1 rounded-2xl transition-all shrink-0';
+                rowEl.className = 'w-full flex items-center justify-between px-2.5 py-1 rounded-2xl transition-all shrink-0';
 
                 const isPastRow = rowIndex < guesses.length;
                 const isCurrentRow = rowIndex === guesses.length && !isGameOver;
@@ -365,23 +370,21 @@
                     rowEl.classList.add('bg-indigo-50/90', 'ring-2', 'ring-indigo-200');
                 }
 
-                // 左側回合編號
+                // 左側回合編號 (固定寬度不換行)
                 const indexBadge = document.createElement('div');
-                indexBadge.className = `w-6 text-xs font-bold num-font text-center ${isCurrentRow ? 'text-indigo-600' : 'text-slate-400'}`;
+                indexBadge.className = `w-6 text-xs font-bold num-font text-left whitespace-nowrap shrink-0 ${isCurrentRow ? 'text-indigo-600' : 'text-slate-400'}`;
                 indexBadge.textContent = `${rowIndex + 1}.`;
                 rowEl.appendChild(indexBadge);
 
-                // 中央 4 個手繪風圓圈容器
+                // 中央 4 個圓圈容器 (適應手機寬度 w-11 h-11, gap-2)
                 const circlesWrap = document.createElement('div');
-                circlesWrap.className = 'flex items-center gap-2.5 sm:gap-3.5';
+                circlesWrap.className = 'flex items-center gap-2 sm:gap-3 shrink-0';
 
                 for (let col = 0; col < 4; col++) {
                     const circle = document.createElement('div');
-                    // 基本圓圈樣式 (手機版微調為 w-11 h-11 避免小螢幕擁擠)
-                    let circleClasses = 'w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold num-font transition-all border-2 relative ';
+                    let circleClasses = 'w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold num-font transition-all border-2 relative shrink-0 ';
 
                     if (isPastRow) {
-                        // 已經猜過的圓圈
                         const digit = guesses[rowIndex].digits[col];
                         const isWinRow = guesses[rowIndex].a === 4;
                         if (isWinRow) {
@@ -391,7 +394,6 @@
                         }
                         circle.textContent = digit;
                     } else if (isCurrentRow) {
-                        // 正在輸入的這一排圓圈
                         const hasDigit = col < currentInput.length;
                         const isActiveCursor = col === currentInput.length;
 
@@ -403,15 +405,14 @@
                             if (isActiveCursor) {
                                 circleClasses += 'bg-white border-indigo-500 border-dashed ring-4 ring-indigo-100';
                             } else {
-                                circleClasses += 'bg-white/80 border-slate-300';
+                                circleClasses += 'bg-white/90 border-slate-300';
                             }
-                            // 如果玩家已使用提示，且這個位置剛好是提示的位置，顯示淡色提示浮水印
+                            // 顯示提示數字浮水印
                             if (hintedInfo && hintedInfo.index === col) {
-                                circle.innerHTML = `<span class="text-amber-400/70 text-sm font-bold">${hintedInfo.digit}</span>`;
+                                circle.innerHTML = `<span class="text-amber-500/75 text-sm font-bold">${hintedInfo.digit}</span>`;
                             }
                         }
                     } else {
-                        // 未來還沒用到的空白圓圈列
                         circleClasses += 'bg-slate-100/80 border-slate-300/80 text-transparent';
                     }
 
@@ -421,9 +422,9 @@
 
                 rowEl.appendChild(circlesWrap);
 
-                // 右側 ?A?B 結果標籤區
+                // 右側 ?A?B 結果標籤區 (強制 whitespace-nowrap shrink-0 min-w-[3.4rem] 絕不斷行)
                 const resultBox = document.createElement('div');
-                resultBox.className = 'w-14 sm:w-16 flex justify-end';
+                resultBox.className = 'min-w-[3.4rem] flex justify-end items-center whitespace-nowrap shrink-0';
 
                 if (isPastRow) {
                     const { a, b } = guesses[rowIndex];
@@ -439,17 +440,17 @@
                         badgeStyle = 'bg-amber-100 text-amber-800 border border-amber-200';
                     }
 
-                    badge.className = `px-2 py-0.5 rounded-full text-xs font-extrabold num-font tracking-wider ${badgeStyle} animate-pop`;
+                    badge.className = `px-2 py-0.5 rounded-full text-xs font-extrabold num-font tracking-wide whitespace-nowrap shrink-0 ${badgeStyle} animate-pop`;
                     badge.textContent = `${a}A${b}B`;
                     resultBox.appendChild(badge);
                 } else if (isCurrentRow) {
                     const hint = document.createElement('span');
-                    hint.className = 'text-[11px] font-bold text-indigo-400 num-font pr-1';
+                    hint.className = 'text-xs font-bold text-indigo-400 num-font text-center w-full whitespace-nowrap shrink-0';
                     hint.textContent = `${currentInput.length}/4`;
                     resultBox.appendChild(hint);
                 } else {
                     const placeholder = document.createElement('span');
-                    placeholder.className = 'text-xs font-bold text-slate-300 num-font pr-2';
+                    placeholder.className = 'text-xs font-bold text-slate-300 num-font text-center w-full whitespace-nowrap shrink-0';
                     placeholder.textContent = '-A-B';
                     resultBox.appendChild(placeholder);
                 }
@@ -458,18 +459,18 @@
                 container.appendChild(rowEl);
             }
 
-            // 更新右上角回合數 (不限上限)
+            // 更新右上角回合數
             document.getElementById('turnCounter').textContent = isGameOver 
                 ? `共 ${guesses.length} 回合` 
                 : `第 ${guesses.length + 1} 回合`;
 
-            // 自動滾動到當前輸入列或最後一列
+            // 自動平滑滾動到當前輸入列或最後一列
             const targetRowIndex = isGameOver ? guesses.length - 1 : guesses.length;
             const activeRow = document.getElementById(`row-${targetRowIndex}`);
             if (activeRow) {
                 setTimeout(() => {
                     activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 50);
+                }, 40);
             }
         }
 
@@ -482,8 +483,7 @@
                 const isUsedInCurrent = currentInput.includes(num);
                 const markState = keyMarks[num] || 0;
 
-                // 重置樣式 (配合手機版尺寸 w-12 h-12 sm:w-14 sm:h-14)
-                btn.className = 'key-btn w-12 h-12 sm:w-14 sm:h-14 rounded-full text-xl sm:text-2xl font-bold num-font flex items-center justify-center transition-all border-2 ';
+                btn.className = 'key-btn w-12 h-12 rounded-full text-xl font-bold num-font flex items-center justify-center transition-all border-2 ';
 
                 if (!isNoteMode && isUsedInCurrent) {
                     btn.className += 'bg-indigo-600 border-indigo-700 text-white opacity-40 scale-95';
@@ -497,7 +497,6 @@
                 }
             }
 
-            // 控制送出按鈕狀態
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = currentInput.length !== 4 || isGameOver;
         }
@@ -506,21 +505,19 @@
         function handleNumberClick(num) {
             if (isGameOver) return;
 
-            // 如果處於「筆記模式」，點擊數字鍵會切換標記（無 -> 排除紅線 -> 確定綠底 -> 無）
+            // 筆記模式：切換標記（0:無 -> 1:紅線排除 -> 2:綠色確認 -> 0:無）
             if (isNoteMode) {
                 keyMarks[num] = ((keyMarks[num] || 0) + 1) % 3;
                 updateKeypadUI();
                 return;
             }
 
-            // 檢查是否已經輸入過該數字
             if (currentInput.includes(num)) {
                 shakeCurrentRow();
                 showToast(`數字 ${num} 已經選過囉！`);
                 return;
             }
 
-            // 檢查是否已滿 4 個數字
             if (currentInput.length >= 4) {
                 shakeCurrentRow();
                 showToast('已經填滿 4 個數字，請按右下角勾勾送出');
@@ -552,7 +549,6 @@
                 return;
             }
 
-            // 計算幾 A 幾 B
             let a = 0;
             let b = 0;
             for (let i = 0; i < 4; i++) {
@@ -563,7 +559,6 @@
                 }
             }
 
-            // 儲存紀錄
             guesses.push({
                 digits: [...currentInput],
                 a,
@@ -571,7 +566,7 @@
             });
             currentInput = [];
 
-            // 1. 判斷是否猜中 4A0B (獲勝)
+            // 判斷是否猜中 4A0B (獲勝)
             if (a === 4) {
                 isGameOver = true;
                 renderBoard();
@@ -581,7 +576,6 @@
                 return;
             }
 
-            // 2. 更新棋盤並檢查是否到達第 5 次（給提示）或第 10 次（可看答案或繼續玩）
             renderBoard();
             updateKeypadUI();
 
@@ -590,14 +584,14 @@
                 const hintBtn = document.getElementById('hintBtn');
                 hintBtn.classList.remove('hidden');
                 hintBtn.classList.add('flex');
-                updateStatusText(`上次 ${a}A${b}B — 已滿 5 次，獲得 1 次提示機會 💡`);
+                updateStatusText(`上次 ${a}A${b}B — 滿 5 次獲得提示機會 💡`);
                 setTimeout(() => toggleModal('hintModal', true), 350);
             } else if (guesses.length === 10) {
-                // 滿 10 次：顯示頂部「看答案」按鈕，並彈出詢問要看答案還是繼續猜
+                // 滿 10 次：顯示頂部「👀答案」按鈕，並彈出詢問視窗
                 const giveUpBtn = document.getElementById('giveUpBtn');
                 giveUpBtn.classList.remove('hidden');
                 giveUpBtn.classList.add('flex');
-                updateStatusText(`上次 ${a}A${b}B — 已滿 10 次，可看答案或繼續挑戰！`);
+                updateStatusText(`上次 ${a}A${b}B — 可看答案或繼續挑戰！`);
                 setTimeout(() => toggleModal('tenRoundModal', true), 350);
             } else {
                 updateStatusText(`上次結果：${a}A${b}B，請繼續推理！`);
@@ -612,13 +606,12 @@
 
         function continuePlayingAfterTen() {
             toggleModal('tenRoundModal', false);
-            showToast('💪 繼續挑戰！隨時可點右上角「看答案」');
+            showToast('💪 繼續挑戰！隨時可點頂部「👀答案」');
         }
 
         function revealAnswerAndEnd() {
             toggleModal('tenRoundModal', false);
             isGameOver = true;
-            // 隱藏提示與看答案按鈕
             document.getElementById('hintBtn').classList.add('hidden');
             document.getElementById('hintBtn').classList.remove('flex');
             document.getElementById('giveUpBtn').classList.add('hidden');
@@ -640,12 +633,10 @@
             hintUsed = true;
             toggleModal('hintModal', false);
 
-            // 隱藏頂部提示按鈕
             const hintBtn = document.getElementById('hintBtn');
             hintBtn.classList.add('hidden');
             hintBtn.classList.remove('flex');
 
-            // 優先挑選玩家還沒在最後一次猜對位置 (A) 的索引來提示
             const lastGuess = guesses[guesses.length - 1]?.digits || [];
             let candidateIndices = [0, 1, 2, 3].filter(idx => lastGuess[idx] !== secretCode[idx]);
             if (candidateIndices.length === 0) candidateIndices = [0, 1, 2, 3];
@@ -654,15 +645,13 @@
             const hintDigit = secretCode[hintIndex];
             hintedInfo = { index: hintIndex, digit: hintDigit };
 
-            // 自動幫玩家把該數字標記為「綠色確定」
             keyMarks[hintDigit] = 2;
 
-            // 顯示提示徽章在狀態列
             const badge = document.getElementById('revealedHintBadge');
-            badge.textContent = `💡 第${hintIndex + 1}個是 ${hintDigit}`;
+            badge.textContent = `💡第${hintIndex + 1}碼:${hintDigit}`;
             badge.classList.remove('hidden');
 
-            updateStatusText(`提示：第 ${hintIndex + 1} 個位置是數字「${hintDigit}」！`);
+            updateStatusText(`提示：第 ${hintIndex + 1} 個位置是「${hintDigit}」！`);
             showToast(`💡 提示：第 ${hintIndex + 1} 個圓圈是 ${hintDigit}`);
             renderBoard();
             updateKeypadUI();
@@ -681,12 +670,12 @@
             const hint = document.getElementById('keypadHint');
 
             if (isNoteMode) {
-                btn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-amber-500 text-white border-amber-600 shadow-xs';
-                text.textContent = '筆記: 開';
-                hint.innerHTML = '<span class="text-amber-600 font-bold">✏️ 點擊下方數字可標記「紅線排除」或「綠色確認」</span>';
+                btn.className = 'flex items-center gap-0.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-amber-500 text-white border-amber-600 shadow-xs whitespace-nowrap shrink-0';
+                text.textContent = '✏️ 筆記中';
+                hint.innerHTML = '<span class="text-amber-600 font-bold">✏️ 點擊數字標記「紅線排除」或「綠色確認」</span>';
             } else {
-                btn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200';
-                text.textContent = '筆記: 關';
+                btn.className = 'flex items-center gap-0.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-all bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 whitespace-nowrap shrink-0';
+                text.textContent = '✏️ 筆記';
                 hint.innerHTML = '<span>點擊下方圓圈輸入數字（5次可提示 / 10次可看答案）</span>';
             }
         }
@@ -701,7 +690,7 @@
             const activeRow = document.getElementById(`row-${guesses.length}`);
             if (activeRow) {
                 activeRow.classList.remove('animate-shake');
-                void activeRow.offsetWidth; // 觸發重繪
+                void activeRow.offsetWidth;
                 activeRow.classList.add('animate-shake');
             }
         }
@@ -770,7 +759,6 @@
             }
         });
 
-        // 啟動遊戲
         window.onload = initGame;
     </script>
 </body>
